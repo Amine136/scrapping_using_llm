@@ -1,0 +1,5 @@
+streamlit
+requests  # Include any other libraries your app uses
+bs4
+re
+huggingface_hub
