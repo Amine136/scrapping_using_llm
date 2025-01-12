@@ -3,7 +3,18 @@ from bs4 import BeautifulSoup
 import re
 from huggingface_hub import InferenceClient
 import streamlit as st
+import logging
 
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),  # Log to a file called app.log
+        logging.StreamHandler()         # Log to the console
+    ]
+)
 
 def scrape_website(url):
   response = requests.get(url)
@@ -61,24 +72,30 @@ def llm(cleaned_data, asked_data):
   return completion.choices[0].message['content']
 
 
+
+
+
 def bot(url, asked_data):
     try:
+        # Log the link and input data
+        logging.info(f"Scraping URL: {url}")
+        logging.info(f"User input (asked_data): {asked_data}")
+
         # Scrape website
         scrapped_text = scrape_website(url)
         if scrapped_text is None:
-            st.warning("Unable to scrape data from the provided URL.")
+            logging.warning("Unable to scrape data from the provided URL.")
             return None
-
-        # Log the scraped data
-        st.info(f"Scraped text: {scrapped_text[:100]}")  # Display only the first 100 characters in logs
 
         # Clean and process data
         cleaned_data = clean_scraped_data(scrapped_text)
         data = llm(cleaned_data, asked_data)
-        st.info(f"LLM output: {data}")
+
+        # Log the result
+        logging.info(f"LLM output: {data}")
         return data
     except Exception as e:
-        st.error(f"An error occurred in the bot: {str(e)}")
+        logging.error(f"An error occurred in the bot: {str(e)}")
         return None
 
 def main():
@@ -91,10 +108,6 @@ def main():
         placeholder="E.g., product price, contact info",
         max_chars=100,  # Enforce 100-character limit here
     )
-
-    # Show character count dynamically
-    if asked_data:
-        st.write(f"Character count: {len(asked_data)}/100")
 
     # Submit button
     if st.button("Process Data"):
@@ -112,4 +125,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
