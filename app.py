@@ -36,7 +36,7 @@ def clean_scraped_data(raw_html):
     return text
 
 
-client = InferenceClient(api_key="")
+client = InferenceClient(api_key=st.secrets["key"])
 def llm(cleaned_data, asked_data):
   messages = [
     {
