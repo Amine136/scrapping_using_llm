@@ -62,35 +62,54 @@ def llm(cleaned_data, asked_data):
 
 
 def bot(url, asked_data):
-  scrapped_text =scrape_website(url)
-  if scrapped_text == None:
-    return None
-  cleaned_data = clean_scraped_data(scrapped_text)
-  words = cleaned_data.split()
-  first_450_words = " ".join(words[:450])
-  data = llm(first_450_words, asked_data)
-  print(data)
-  return data
+    try:
+        # Scrape website
+        scrapped_text = scrape_website(url)
+        if scrapped_text is None:
+            st.warning("Unable to scrape data from the provided URL.")
+            return None
 
+        # Log the scraped data
+        st.info(f"Scraped text: {scrapped_text[:100]}")  # Display only the first 100 characters in logs
 
+        # Clean and process data
+        cleaned_data = clean_scraped_data(scrapped_text)
+        data = llm(cleaned_data, asked_data)
+        st.info(f"LLM output: {data}")
+        return data
+    except Exception as e:
+        st.error(f"An error occurred in the bot: {str(e)}")
+        return None
 
 def main():
     st.title("Data Scraping and Processing")
 
     # Input fields for the user
     link = st.text_input("Enter the link:", placeholder="https://example.com")
-    scrapped_data = st.text_area("Enter the scrapped data:", placeholder="Paste your scrapped data here")
+    asked_data = st.text_input(
+        "Enter the specific data you need (max 100 characters):",
+        placeholder="E.g., product price, contact info",
+        max_chars=100,  # Enforce 100-character limit here
+    )
+
+    # Show character count dynamically
+    if asked_data:
+        st.write(f"Character count: {len(asked_data)}/100")
 
     # Submit button
     if st.button("Process Data"):
-        if link and scrapped_data:
+        if link and asked_data:
             # Call the bot function with inputs
-            result = bot(link, scrapped_data)
-            st.success("Data processed successfully!")
-            st.write("**Output:**")
-            st.write(result)
+            result = bot(link, asked_data)
+            if result:
+                st.success("Data processed successfully!")
+                st.write("**Output:**")
+                st.write(result)
+            else:
+                st.error("Failed to process data. Please check the URL or input.")
         else:
-            st.error("Please provide both the link and scrapped data.")
+            st.error("Please provide both the link and the specific data needed.")
 
 if __name__ == "__main__":
     main()
+
