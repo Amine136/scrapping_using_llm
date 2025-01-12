@@ -1,5 +1,4 @@
 streamlit
-requests  
+requests
 beautifulsoup4
-re
-huggingface_hub
+huggingface-hub
