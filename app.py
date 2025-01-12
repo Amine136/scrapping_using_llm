@@ -66,7 +66,9 @@ def bot(url, asked_data):
   if scrapped_text == None:
     return None
   cleaned_data = clean_scraped_data(scrapped_text)
-  data = llm(cleaned_data, asked_data)
+  words = cleaned_data.split()
+  first_450_words = " ".join(words[:450])
+  data = llm(first_450_words, asked_data)
   print(data)
   return data
 
